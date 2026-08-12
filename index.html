@@ -276,6 +276,31 @@ html,body,.reveal-viewport{background-color:var(--ink);color:var(--paper);}
 .col p{font-size:22px;line-height:1.45;margin:0 0 12px;}
 .col p:last-child{margin-bottom:0;}
 
+/* ---- photo exhibits ----
+   reveal.css base sets `.reveal section img{background:#fff;border:1px solid #666}`
+   (normally a theme overrides it). Reset it so photos sit on the ink ground. */
+.reveal section img{background:none;box-shadow:none;margin:0;border:1px solid var(--rule);}
+/* shrink-wrap the figure so the caption rule aligns to the photo edge,
+   not the full content column */
+.exhibit{margin:0;width:fit-content;max-width:100%;}
+.exhibit img{
+  display:block;
+  max-width:100%;
+  max-height:524px;
+  width:auto;
+  height:auto;
+}
+.exhibit figcaption{
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.6;
+  letter-spacing:0.015em;
+  color:var(--muted);
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid var(--rule);
+}
+
 /* ---- dense slides ---- */
 .dense{font-size:24px;}
 .dense h2{font-size:38px;margin-bottom:24px;padding-bottom:18px;}
@@ -364,6 +389,17 @@ html,body,.reveal-viewport{background-color:var(--ink);color:var(--paper);}
 </textarea></section>
 
 
+<!-- ======== EXHIBIT — WORLD'S FAIR ======== -->
+<section data-markdown><textarea data-template>
+
+<figure class="exhibit">
+<img src="images/aie-worlds-fair.jpg" width="1800" height="814" alt="Large freestanding AIE letters on a red carpet in front of the AI Engineer World's Fair sponsor wall.">
+<figcaption>AI Engineer World's Fair · San Francisco</figcaption>
+</figure>
+
+</textarea></section>
+
+
 <!-- ============ 2 ============ -->
 <section data-markdown><textarea data-template>
 
@@ -406,6 +442,17 @@ html,body,.reveal-viewport{background-color:var(--ink);color:var(--paper);}
 </div>
 
 <p class="attr">Gopal · Day 2</p>
+
+</textarea></section>
+
+
+<!-- ======== EXHIBIT — COMPANY BRAIN ======== -->
+<section data-markdown><textarea data-template>
+
+<figure class="exhibit">
+<img src="images/company-brain.jpg" width="1800" height="1039" alt="Conference slide titled 'The 4 rules for a company brain with company AI': all context goes into a company-wide wiki with a human's name attached; wiki pages can have scopes users control deterministically; do not store credentials in the cloud sandbox; virtualize tool and data calls to inject credentials.">
+<figcaption>The 4 rules for a company brain — Tanmai Gopal, Day 2</figcaption>
+</figure>
 
 </textarea></section>
 
@@ -493,6 +540,17 @@ html,body,.reveal-viewport{background-color:var(--ink);color:var(--paper);}
 <div class="entry"><span class="who">Kyle Mistele, HumanLayer, 3:45pm</span><p>Ran the lights-off factory six months. Bad code compounded. Agents created problems agents couldn't solve. Threw it away.</p></div>
 <div class="entry"><span class="who">Dex Horthy, HumanLayer, 4:30pm keynote</span><p><em>Why Software Factories Fail</em></p></div>
 </div>
+
+</textarea></section>
+
+
+<!-- ======== EXHIBIT — THE BOTTLENECK ======== -->
+<section data-markdown><textarea data-template>
+
+<figure class="exhibit">
+<img src="images/bottleneck.jpg" width="1800" height="1129" alt="Conference slide titled 'The Bottleneck Transformed': when generating code becomes virtually free, software creation is no longer the key constraint and system pressure shifts to validation and specification.">
+<figcaption>The Bottleneck Transformed — photographed at the conference</figcaption>
+</figure>
 
 </textarea></section>
 
@@ -630,6 +688,17 @@ html,body,.reveal-viewport{background-color:var(--ink);color:var(--paper);}
 | Memory | The model | Knowledge, expertise, norms |  |
 | Compute | The API | The terms, the cost, and where it runs |  |
 | Output | The generation | The verdict |  |
+
+</textarea></section>
+
+
+<!-- ======== EXHIBIT — QUIZZES ======== -->
+<section data-markdown><textarea data-template>
+
+<figure class="exhibit">
+<img src="images/quizzes.jpg" width="1800" height="907" alt="Conference slide titled 'Quizzes' showing a prompt: asking for an HTML report on the changes to read and understand with context and intuition, and a quiz at the bottom on the changes that the reader must pass.">
+<figcaption>Quizzes — photographed at the conference</figcaption>
+</figure>
 
 </textarea></section>
 
