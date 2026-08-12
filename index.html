@@ -1,0 +1,655 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Ownership Problem</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.css">
+
+<style>
+:root{
+  --ink:#05070A;
+  --paper:#E4E9ED;
+  --bright:#FFFFFF;
+  --muted:#B6C0CA;
+  --rule:rgba(228,233,237,0.26);
+  --accent:#E8842A;
+  --sans:'Space Grotesk',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+
+/* reveal.css hard-codes background-color:#fff on .reveal-viewport (normally a
+   theme overrides it). No theme is loaded here, so this must be set explicitly. */
+html,body,.reveal-viewport{background-color:var(--ink);color:var(--paper);}
+
+.reveal{
+  font-family:var(--sans);
+  font-size:30px;
+  font-weight:400;
+  color:var(--paper);
+  -webkit-font-smoothing:antialiased;
+}
+.reveal .slides{text-align:left;}
+.reveal .slides section{text-align:left;}
+
+/* ---- headings ---- */
+.reveal h1,.reveal h2,.reveal h3{
+  font-family:var(--sans);
+  font-weight:700;
+  letter-spacing:-0.026em;
+  line-height:1.08;
+  text-transform:none;
+  text-shadow:none;
+  margin:0 0 32px;
+  color:var(--bright);
+}
+.reveal h1{font-size:66px;}
+.reveal h2{
+  font-size:46px;
+  padding-bottom:22px;
+  border-bottom:1px solid var(--rule);
+}
+.reveal h3{font-size:29px;font-weight:400;color:var(--muted);}
+
+/* No color here: `.reveal p` (0,1,1) would outrank single-class utilities
+   like .eyebrow / .attr / .who (0,1,0). Color is inherited instead. */
+.reveal p{margin:0 0 22px;line-height:1.5;}
+.reveal p:last-child{margin-bottom:0;}
+.reveal strong{font-weight:700;color:var(--bright);}
+.reveal em{font-style:italic;}
+
+.reveal ul,.reveal ol{display:block;margin:0 0 22px;padding-left:0;list-style:none;}
+.reveal li{
+  position:relative;
+  padding-left:30px;
+  margin:0 0 14px;
+  line-height:1.45;
+}
+.reveal li:last-child{margin-bottom:0;}
+.reveal li::before{
+  content:"—";
+  position:absolute;
+  left:0;
+  color:var(--accent);
+  font-family:var(--mono);
+  font-size:0.7em;
+  top:0.42em;
+  line-height:1;
+}
+
+/* ---- blockquote: strip reveal defaults ---- */
+.reveal blockquote{
+  display:block;
+  position:relative;
+  width:100%;
+  max-width:none;
+  margin:0 0 26px;
+  padding:0 0 0 32px;
+  background:none;
+  box-shadow:none;
+  border-left:2px solid var(--accent);
+  font-style:normal;
+  font-size:1em;
+}
+.reveal blockquote p{margin:0 0 20px;}
+.reveal blockquote p:last-child{margin-bottom:0;}
+
+.reveal code,.reveal pre{font-family:var(--mono);}
+.reveal code{font-size:0.86em;color:var(--accent);background:none;}
+
+/* ---- type utilities ---- */
+.eyebrow{
+  font-family:var(--mono);
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:0.19em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 16px !important;
+}
+.attr{
+  font-family:var(--mono);
+  font-size:15px;
+  font-weight:400;
+  line-height:1.65;
+  letter-spacing:0.015em;
+  color:var(--muted);
+  margin:38px 0 0 !important;
+  padding-top:15px;
+  border-top:1px solid var(--rule);
+}
+.stmt{
+  font-size:52px;
+  font-weight:700;
+  letter-spacing:-0.025em;
+  line-height:1.13;
+  color:var(--bright) !important;
+  margin:0 0 34px !important;
+}
+.stmt:last-child{margin-bottom:0 !important;}
+.stmt-sm{
+  font-size:38px;
+  font-weight:500;
+  letter-spacing:-0.018em;
+  line-height:1.28;
+  color:var(--bright) !important;
+}
+.ask{
+  font-size:52px;
+  font-weight:700;
+  letter-spacing:-0.025em;
+  line-height:1.13;
+  color:var(--accent) !important;
+  margin:0 !important;
+}
+.stack{line-height:1.6;}
+.dim{color:var(--muted);}
+
+/* ---- section separators ---- */
+.act-break .act{
+  font-size:74px;
+  font-weight:700;
+  letter-spacing:-0.032em;
+  line-height:1.1;
+  color:var(--accent) !important;
+  margin:0 !important;
+}
+
+/* ---- cold open ---- */
+.cold-open blockquote{border-left:none;padding:0;}
+.cold-open .line{
+  font-size:80px;
+  font-weight:500;
+  letter-spacing:-0.032em;
+  line-height:1.16;
+  color:var(--bright) !important;
+  margin:0;
+}
+
+/* ---- flow diagrams ---- */
+.flow{
+  display:flex;
+  align-items:stretch;
+  flex-wrap:wrap;
+  gap:0;
+  margin:0 0 34px;
+}
+.flow-step{
+  flex:1 1 0;
+  min-width:132px;
+  border:1px solid var(--rule);
+  padding:20px 18px 22px;
+  font-size:19px;
+  line-height:1.38;
+}
+.flow-step .n{
+  display:block;
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:0.2em;
+  color:var(--accent);
+  margin-bottom:14px;
+}
+.flow-step .t{display:block;}
+.flow-arrow{
+  flex:0 0 auto;
+  align-self:center;
+  padding:0 14px;
+  font-family:var(--mono);
+  font-size:19px;
+  line-height:1;
+  color:var(--accent);
+}
+
+/* ---- metrics ---- */
+.metrics{
+  font-family:var(--mono);
+  font-size:25px;
+  line-height:1.8;
+  color:var(--muted);
+  margin:0 0 30px;
+}
+.metrics .v{color:var(--accent);}
+
+/* ---- labelled entries ---- */
+.entries{border-top:1px solid var(--rule);padding-top:22px;}
+.entry{margin:0 0 22px;}
+.entry:last-child{margin-bottom:0;}
+.who{
+  font-family:var(--mono);
+  font-size:16px;
+  letter-spacing:0.02em;
+  color:var(--accent);
+  display:block;
+  margin-bottom:8px;
+}
+.entry p{margin:0;line-height:1.45;}
+
+/* inline sequence, e.g. Guide -> Verify -> Solve */
+.seq .a{color:var(--accent);font-family:var(--mono);padding:0 6px;}
+
+/* ---- rule-separated groups ---- */
+.group{
+  border-top:1px solid var(--rule);
+  padding-top:20px;
+  margin:20px 0 0;
+}
+.group p{margin:0 0 10px;line-height:1.45;}
+.group p:last-child{margin-bottom:0;}
+.note-line{
+  font-family:var(--mono);
+  font-size:17px;
+  line-height:1.6;
+  color:var(--muted);
+  margin:0 0 16px !important;
+}
+.open-q{
+  font-family:var(--mono);
+  font-size:18px;
+  line-height:1.6;
+  color:var(--accent);
+  margin:20px 0 0 !important;
+  padding-top:18px;
+  border-top:1px solid var(--rule);
+}
+
+/* ---- two columns ---- */
+.cols{display:flex;gap:64px;align-items:flex-start;}
+.col{flex:1 1 0;min-width:0;}
+.col-head{
+  font-family:var(--mono);
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:0.19em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 18px !important;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--rule);
+}
+.col p{font-size:22px;line-height:1.45;margin:0 0 12px;}
+.col p:last-child{margin-bottom:0;}
+
+/* ---- dense slides ---- */
+.dense{font-size:24px;}
+.dense h2{font-size:38px;margin-bottom:24px;padding-bottom:18px;}
+.dense li{margin-bottom:11px;}
+.dense p{margin-bottom:16px;}
+.dense .stmt-sm{font-size:30px;}
+
+/* ---- table ---- */
+.reveal table{
+  border-collapse:collapse;
+  width:100%;
+  margin:0;
+  font-size:23px;
+}
+.reveal table th{
+  font-family:var(--mono);
+  font-size:12px;
+  font-weight:500;
+  letter-spacing:0.19em;
+  text-transform:uppercase;
+  color:var(--accent);
+  text-align:left;
+  padding:0 26px 16px 0;
+  border-bottom:1px solid var(--rule);
+  vertical-align:bottom;
+}
+.reveal table td{
+  padding:22px 26px 22px 0;
+  border-bottom:1px solid var(--rule);
+  border-left:none;
+  border-right:none;
+  text-align:left;
+  vertical-align:top;
+  line-height:1.4;
+}
+.reveal table th:first-child,.reveal table td:first-child{width:14%;}
+.reveal table td:first-child{font-weight:700;color:var(--bright);}
+.reveal table th:nth-child(2),.reveal table td:nth-child(2){width:17%;color:var(--muted);}
+.reveal table th:last-child,.reveal table td:last-child{width:20%;padding-right:0;}
+
+/* ---- title slide ---- */
+.title-slide h1{margin-bottom:0;}
+
+/* ---- chrome ---- */
+.reveal .progress{height:2px;color:var(--accent);background:rgba(228,233,237,0.07);}
+.reveal .slide-number{
+  background:none;
+  font-family:var(--mono);
+  font-size:13px;
+  letter-spacing:0.06em;
+  color:var(--muted);
+  right:28px;
+  bottom:22px;
+}
+.reveal .controls{color:var(--muted);}
+
+@media (max-width:700px){
+  .cols{flex-direction:column;gap:32px;}
+  .flow-arrow{transform:rotate(90deg);padding:8px 0;align-self:flex-start;}
+  .flow-step{flex:1 1 100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- ============ TITLE ============ -->
+<section data-markdown class="title-slide"><textarea data-template>
+
+# The Ownership Problem
+
+<p class="attr">Minneapolis AI Engineer Meetup · August 12, 2026<br>Mike Halagan · Local AI</p>
+
+</textarea></section>
+
+
+<!-- ============ 1 ============ -->
+<section data-markdown class="cold-open"><textarea data-template>
+
+<blockquote>
+<p class="line">"Show me the files I edited recently."</p>
+</blockquote>
+
+</textarea></section>
+
+
+<!-- ============ 2 ============ -->
+<section data-markdown><textarea data-template>
+
+## Five weeks later
+
+<blockquote>
+<p class="stmt-sm">"Your company brain will leak secrets."</p>
+</blockquote>
+
+<p class="stmt">Skills · Memory · Compute · Output</p>
+
+<p class="ask">Who owns them?</p>
+
+<p class="attr">Tanmai Gopal · Day 2</p>
+
+</textarea></section>
+
+
+<!-- ======== SEPARATOR — MEMORY ======== -->
+<section data-markdown class="act-break"><textarea data-template>
+
+<p class="act">Who owns the memory?</p>
+
+</textarea></section>
+
+
+<!-- ============ 6 ============ -->
+<section data-markdown><textarea data-template>
+
+<blockquote>
+<p class="stmt">Grow a company brain.<br>Don't build one.</p>
+</blockquote>
+
+<div class="flow">
+<div class="flow-step"><span class="n">01</span><span class="t">Agent <em>suggests</em> with scopes</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">02</span><span class="t">Human accepts</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">03</span><span class="t"><strong>A name is attached</strong></span></div>
+</div>
+
+<p class="attr">Gopal · Day 2</p>
+
+</textarea></section>
+
+
+<!-- ============ 8 ============ -->
+<section data-markdown><textarea data-template>
+
+## What rollouts actually look like
+
+<p class="stmt-sm stack">Chatbot only.<br>No data connections.<br>No SharePoint.</p>
+
+<blockquote>
+<p>"AI agents don't read your policy docs. They hit your APIs."</p>
+</blockquote>
+
+<p class="attr">Day 3</p>
+
+</textarea></section>
+
+
+<!-- ======== SEPARATOR — SKILL ======== -->
+<section data-markdown class="act-break"><textarea data-template>
+
+<p class="act">Who owns the skill?</p>
+
+</textarea></section>
+
+
+<!-- ============ 3 ============ -->
+<section data-markdown><textarea data-template>
+
+## The flywheel
+
+<div class="flow">
+<div class="flow-step"><span class="n">01</span><span class="t">Agent run</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">02</span><span class="t">Trace</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">03</span><span class="t">Distilled skill</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">04</span><span class="t">Org library</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">05</span><span class="t">MCP gateway</span></div>
+<div class="flow-arrow">&rarr;</div>
+<div class="flow-step"><span class="n">06</span><span class="t">Every agent</span></div>
+</div>
+
+</textarea></section>
+
+
+<!-- ============ 5 ============ -->
+<section data-markdown><textarea data-template>
+
+## So I started building it
+
+<blockquote>
+<p class="stmt-sm">Since July: building evaluations around our own skills.</p>
+</blockquote>
+
+</textarea></section>
+
+
+<!-- ======== SEPARATOR — OUTPUT ======== -->
+<section data-markdown class="act-break"><textarea data-template>
+
+<p class="act">Who owns the output?</p>
+
+</textarea></section>
+
+
+<!-- ============ 14 ============ -->
+<section data-markdown class="dense"><textarea data-template>
+
+## Everyone drew the same machine, then told us why it fails
+
+<p class="stmt-sm">Day 2's main stage was software factories, top to bottom.</p>
+
+<div class="entries">
+<div class="entry"><span class="who">Sonar — AC/DC</span><p class="seq">Guide<span class="a">&rarr;</span><strong>Verify</strong><span class="a">&rarr;</span>Solve</p></div>
+<div class="entry"><span class="who">Warp</span><p>Self-improving factories: agents that update skills, cross-harness memory, feedback loops</p></div>
+<div class="entry"><span class="who">Factory</span><p>The differentiator is infrastructure: machine-readable codebases, deterministic APIs, agent-addressable CI/CD, <strong>and permission models granular enough to scope exactly what an agent can touch</strong></p></div>
+</div>
+
+<div class="entries">
+<div class="entry"><span class="who">Kyle Mistele, HumanLayer, 3:45pm</span><p>Ran the lights-off factory six months. Bad code compounded. Agents created problems agents couldn't solve. Threw it away.</p></div>
+<div class="entry"><span class="who">Dex Horthy, HumanLayer, 4:30pm keynote</span><p><em>Why Software Factories Fail</em></p></div>
+</div>
+
+</textarea></section>
+
+
+<!-- ============ 15 ============ -->
+<section data-markdown class="dense"><textarea data-template>
+
+## Verifiers are king
+
+<p class="stmt-sm">Hallucination is not a temporary bug.<br>As models get more capable, failures get <strong>more frequent and more convincing.</strong><br>Cognitive surrender among reviewers is an acute risk.</p>
+
+<blockquote>
+<p>"Most organizations still treat AI as a productivity tool rather than a governance challenge."</p>
+</blockquote>
+
+<p class="attr">Tariq Shaukat, CEO, Sonar — <em>In the Land of AI Agents, the Verifiers Are King</em><br>Day 3 Main Stage keynote</p>
+
+</textarea></section>
+
+
+<!-- ======== SEPARATOR — COMPUTE ======== -->
+<section data-markdown class="act-break"><textarea data-template>
+
+<p class="act">Who owns the compute?</p>
+
+</textarea></section>
+
+
+<!-- ============ 10 ============ -->
+<section data-markdown><textarea data-template>
+
+## I spent all of Thursday on this
+
+<p class="eyebrow">Thursday, Day 4 — local AI, all day</p>
+
+<p>Enterprises don't want to pay frontier prices for every workload.<br>They don't want to be told what to run.<br>They don't want the rug pulled.</p>
+
+<blockquote>
+<p class="stmt-sm">"We're in the 90s of Linux, but for local AI."</p>
+</blockquote>
+
+</textarea></section>
+
+
+<!-- ============ 11 ============ -->
+<section data-markdown class="dense"><textarea data-template>
+
+## Why it's suddenly working
+
+<p class="stmt-sm">Small isn't beating big. Newer efficient is beating older inefficient.</p>
+
+<p class="note-line">Better data · training recipes · tokenizers · post-training · eval loops</p>
+
+<div class="group">
+<p>Qwen 4B ≈ GPT-4o in your pocket</p>
+<p>GB300 already runs 5.2-class frontier</p>
+<p>Panel forecast: GLM-5.2-class on a 32GB GPU within ~18 months</p>
+</div>
+
+<div class="group">
+<p><strong>Qdrant, Day 3:</strong> 540B params to clear 60% MMLU in 2022 &rarr; 3.8B two years later. <strong>142x.</strong></p>
+<p class="dim">They called the gap "the lag" — frontier capability to hardware you own.</p>
+</div>
+
+</textarea></section>
+
+
+<!-- ============ 12 ============ -->
+<section data-markdown class="dense"><textarea data-template>
+
+## What it actually takes
+
+<p class="stmt-sm">A bigger model quantized to 4-bit beats a smaller model at 16-bit.</p>
+
+<div class="group">
+<p>First and last layers matter most — you can't quantize uniformly</p>
+<p>NVFP4 micro block scaling · linear-attention architectures resist quantization</p>
+<p>Next frontier: KV-cache compression, compaction plus quantization</p>
+</div>
+
+<div class="group">
+<p>Decode is <strong>memory-bandwidth bound</strong>, not compute bound &rarr; your SLO sets your batch size</p>
+<p>GQA is a baseline, not an optimization · continuous batching · speculative decoding ~3x on coding</p>
+</div>
+
+<p class="open-q">Still open: fine-tune then quantize, quantize then fine-tune, or both together?</p>
+
+</textarea></section>
+
+
+<!-- ============ 13 ============ -->
+<section data-markdown class="dense"><textarea data-template>
+
+## The honest part, and the stakes
+
+<div class="cols">
+<div class="col">
+<p class="col-head">What's still broken</p>
+<p>"This is way too complicated right now."</p>
+<p>Which hardware for which use case: unsolved.</p>
+<p>Which model for which job: routing is one piece.</p>
+<p>Don't make people think about quantization.</p>
+<p>Trust and safety are not the same thing.</p>
+</div>
+<div class="col">
+<p class="col-head">What's coming</p>
+<p>Constant cost visibility is becoming a CFO problem. Jevons paradox.</p>
+<p>The vast majority of what we need AI for doesn't need a frontier model.</p>
+<p><strong>Only ~10% of people have ever run a model locally.</strong></p>
+<p>"The most consequential year for how AI gets distributed."</p>
+</div>
+</div>
+
+</textarea></section>
+
+
+<!-- ============ 16 ============ -->
+<section data-markdown><textarea data-template>
+
+## Understanding is the new bottleneck
+
+<p class="stmt-sm">Verifying correctness isn't enough.<br>You have to understand the work.</p>
+
+<p class="attr">Geoffrey Litt, Notion · Day 3</p>
+
+</textarea></section>
+
+
+<!-- ============ 17 ============ -->
+<section data-markdown><textarea data-template>
+
+|  | Rented | Owned | Who owns it? |
+|---|---|---|---|
+| Skills | The model | The rituals nobody wants rediscovered |  |
+| Memory | The model | Knowledge, expertise, norms |  |
+| Compute | The API | The terms, the cost, and where it runs |  |
+| Output | The generation | The verdict |  |
+
+</textarea></section>
+
+</div>
+</div>
+
+<script type="module">
+import Reveal from 'https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/dist/reveal.esm.js';
+import Markdown from 'https://cdn.jsdelivr.net/npm/reveal.js@5.2.1/plugin/markdown/markdown.esm.js';
+
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'none',
+  width: 1280,
+  height: 780,
+  margin: 0.12,
+  plugins: [ Markdown ]
+});
+</script>
+
+</body>
+</html>
